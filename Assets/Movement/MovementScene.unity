@@ -390,6 +390,7 @@ MonoBehaviour:
   GroundHalfSize: {x: 100, y: 50}
   MovementComputeShader: {fileID: 7200000, guid: 34385b8ad49686d47a86daed128d068e,
     type: 3}
+  MoveSpeed: 10
 --- !u!4 &1497193611
 Transform:
   m_ObjectHideFlags: 0

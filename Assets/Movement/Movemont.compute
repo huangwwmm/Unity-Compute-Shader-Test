@@ -1,12 +1,33 @@
-﻿#pragma kernel Movemont
+﻿#pragma kernel Update
 
-RWTexture2D<float4> Result;
+struct CB_IO_RoleState
+{
+    float3 Position;
+    int ISArrival;
+};
 
-#define THREAD_X    32
-#define THREAD_Y    1
-#define THREAD_Z    1
+struct CB_I_RoleCommand
+{
+    float3 MoveTo;
+    float Speed;
+};
+
+RWStructuredBuffer<CB_IO_RoleState> RoleStates;
+RWStructuredBuffer<CB_I_RoleCommand> RoleCommands;
+float _DeltaTime;
+
+#define THREAD_X 32
+#define THREAD_Y 1
+#define THREAD_Z 1
 
 [numthreads(THREAD_X, THREAD_Y, THREAD_Z)]
-void Movemont(uint3 id : SV_DispatchThreadID)
+void Update(uint3 id : SV_DispatchThreadID)
 {
+    uint threadIdx = id.z * THREAD_X * THREAD_Y
+        + id.y * THREAD_X 
+        + id.x;
+
+    float3 direction = normalize(RoleCommands[threadIdx].MoveTo - RoleStates[threadIdx].Position);
+    RoleStates[threadIdx].Position += direction * RoleCommands[threadIdx].Speed * _DeltaTime;
+    RoleStates[threadIdx].ISArrival = distance(RoleStates[threadIdx].Position, RoleCommands[threadIdx].MoveTo) < 1;
 }
