@@ -1,22 +1,27 @@
 ﻿#pragma kernel Update
 
-struct CB_IO_RoleState
+struct RoleState
 {
     float3 Position;
-    int ISArrival;
 };
 
-struct CB_I_RoleCommand
+struct RoleCommand
 {
     float3 MoveTo;
     float Speed;
 };
 
-RWStructuredBuffer<CB_IO_RoleState> RoleStates;
-RWStructuredBuffer<CB_I_RoleCommand> RoleCommands;
+struct RoleResult
+{
+    int ISArrival;
+};
+
+RWStructuredBuffer<RoleState> RoleStates;
+RWStructuredBuffer<RoleCommand> RoleCommands;
+RWStructuredBuffer<RoleResult> RoleResults;
 float _DeltaTime;
 
-#define THREAD_X 32
+#define THREAD_X 1024
 #define THREAD_Y 1
 #define THREAD_Z 1
 
@@ -29,5 +34,5 @@ void Update(uint3 id : SV_DispatchThreadID)
 
     float3 direction = normalize(RoleCommands[threadIdx].MoveTo - RoleStates[threadIdx].Position);
     RoleStates[threadIdx].Position += direction * RoleCommands[threadIdx].Speed * _DeltaTime;
-    RoleStates[threadIdx].ISArrival = distance(RoleStates[threadIdx].Position, RoleCommands[threadIdx].MoveTo) < 1;
+    RoleResults[threadIdx].ISArrival = distance(RoleStates[threadIdx].Position, RoleCommands[threadIdx].MoveTo) < 1;
 }
